@@ -315,17 +315,16 @@ const INITIAL_BOOKS = [
   { title: "O Iluminado",      author: "Stephen King", series: null, volume: null, genre: "Terror", status: "unread" },
   { title: "Danse Macabre",    author: "Stephen King", series: null, volume: null, genre: "Terror/Não-ficção", status: "unread" },
   { title: "A Espera de um Milagre", author: "Stephen King", series: null, volume: null, genre: "Drama", status: "unread" },
-  { title: "The Lord of the Rings (ed. inglês)", author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: null, genre: "Fantasia", status: "unread" },
+  { title: "The Lord of the Rings", author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: null, genre: "Fantasia", status: "unread", language: "en", editions: 1 },
   { title: "O Silmarillion",        author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
   { title: "Os Filhos de Húrin",    author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
   { title: "Beren e Lúthien",       author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
-  { title: "O Hobbit",              author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
-  { title: "O Hobbit (ed. ilustrada)", author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
-  { title: "A Sociedade do Anel",   author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 1, genre: "Fantasia", status: "unread" },
-  { title: "As Duas Torres",        author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 2, genre: "Fantasia", status: "unread" },
-  { title: "O Retorno do Rei",      author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 3, genre: "Fantasia", status: "unread" },
+  { title: "Contos Inacabados",     author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
+  { title: "O Hobbit",              author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread", editions: 2 },
+  { title: "A Sociedade do Anel",   author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 1, genre: "Fantasia", status: "unread", editions: 2 },
+  { title: "As Duas Torres",        author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 2, genre: "Fantasia", status: "unread", editions: 2 },
+  { title: "O Retorno do Rei",      author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 3, genre: "Fantasia", status: "unread", editions: 2 },
   { title: "A Queda de Númenor",    author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
-  { title: "O Senhor dos Anéis (box)", author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: null, genre: "Fantasia", status: "unread" },
   { title: "A Tormenta de Espadas", author: "George R.R. Martin", series: "As Crônicas de Gelo e Fogo", volume: 3, genre: "Fantasia", status: "unread" },
   { title: "O Festim dos Corvos",   author: "George R.R. Martin", series: "As Crônicas de Gelo e Fogo", volume: 4, genre: "Fantasia", status: "unread" },
   { title: "A Dança dos Dragões",   author: "George R.R. Martin", series: "As Crônicas de Gelo e Fogo", volume: 5, genre: "Fantasia", status: "unread" },
@@ -339,9 +338,9 @@ const INITIAL_BOOKS = [
   { title: "Ponto de Impacto",  author: "Dan Brown", series: null, volume: null, genre: "Thriller", status: "unread" },
   { title: "O Símbolo Perdido", author: "Dan Brown", series: "Robert Langdon", volume: null, genre: "Thriller", status: "unread" },
   { title: "O Segredo Final",   author: "Dan Brown", series: null, volume: null, genre: "Thriller", status: "unread" },
-  { title: "Harry Potter and the Sorcerer's Stone",    author: "J.K. Rowling", series: "Harry Potter", volume: 1, genre: "Fantasia", status: "unread" },
-  { title: "Harry Potter and the Chamber of Secrets",  author: "J.K. Rowling", series: "Harry Potter", volume: 2, genre: "Fantasia", status: "unread" },
-  { title: "Harry Potter and the Prisoner of Azkaban", author: "J.K. Rowling", series: "Harry Potter", volume: 3, genre: "Fantasia", status: "unread" },
+  { title: "Harry Potter and the Sorcerer's Stone",    author: "J.K. Rowling", series: "Harry Potter", volume: 1, genre: "Fantasia", status: "unread", language: "en" },
+  { title: "Harry Potter and the Chamber of Secrets",  author: "J.K. Rowling", series: "Harry Potter", volume: 2, genre: "Fantasia", status: "unread", language: "en" },
+  { title: "Harry Potter and the Prisoner of Azkaban", author: "J.K. Rowling", series: "Harry Potter", volume: 3, genre: "Fantasia", status: "unread", language: "en" },
   { title: "12 Regras Para a Vida", author: "Jordan B. Peterson", series: null, volume: null, genre: "Autoajuda", status: "unread" },
   { title: "Além da Ordem",         author: "Jordan B. Peterson", series: null, volume: null, genre: "Autoajuda", status: "unread" },
   { title: "A Revolta de Atlas",    author: "Ayn Rand",       series: null, volume: null, genre: "Ficção/Filosofia", status: "unread" },
@@ -379,10 +378,10 @@ const INITIAL_BOOKS = [
   { title: "Em Busca de Nós Mesmos", author: "Cláudio de Barros Filho / Pedro Calabrez", series: null, volume: null, genre: "Filosofia/Psicologia", status: "unread" },
   { title: "Em Busca de Sentido",   author: "Viktor E. Frankl", series: null, volume: null, genre: "Psicologia", status: "unread" },
   { title: "A Lição Final",         author: "Randy Pausch", series: null, volume: null, genre: "Autoajuda", status: "unread" },
-  { title: "Tuesdays with Morrie",  author: "Mitch Albom", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "Tuesdays with Morrie",  author: "Mitch Albom", series: null, volume: null, genre: "Autoajuda", status: "unread", language: "en" },
   { title: "O Homem Mais Feliz do Mundo", author: "Eddie Jaku", series: null, volume: null, genre: "Memórias", status: "unread" },
   { title: "A morte é um dia que vale a pena viver", author: "Ana Cláudia Quintana Arantes", series: null, volume: null, genre: "Autoajuda", status: "unread" },
-  { title: "Quem Pensa Enriquece",  author: "Napoleon Hill", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "Quem Pensa Enriquece",  author: "Napoleon Hill", series: null, volume: null, genre: "Autoajuda", status: "unread", editions: 2 },
   { title: "As 48 Leis do Poder",   author: "Robert Greene", series: null, volume: null, genre: "Autoajuda", status: "unread" },
   { title: "A Arte da Guerra",      author: "Sun Tzu", series: null, volume: null, genre: "Estratégia", status: "unread" },
   { title: "Comunicação Não Violenta", author: "Marshall B. Rosenberg", series: null, volume: null, genre: "Comunicação", status: "unread" },
@@ -409,10 +408,15 @@ const INITIAL_BOOKS = [
   { title: "Contos e Sagas Nórdicos", author: null, series: null, volume: null, genre: "Mitologia", status: "unread" },
   { title: "Meditações",            author: "Marco Aurélio", series: null, volume: null, genre: "Filosofia", status: "unread" },
   { title: "Cartas de um Diabo a seu Aprendiz", author: "C.S. Lewis", series: null, volume: null, genre: "Ficção/Fantasia", status: "unread" },
+  { title: "A Revolução dos Bichos", author: "George Orwell", series: null, volume: null, genre: "Distopia", status: "unread" },
   { title: "Viagem ao Redor do Meu Quarto", author: "Xavier de Maistre", series: null, volume: null, genre: "Clássico", status: "unread" },
   { title: "Aventuras Inéditas de Sherlock Holmes", author: "Arthur Conan Doyle", series: "Sherlock Holmes", volume: null, genre: "Mistério", status: "unread" },
-  { title: "A Great Place to Work for All", author: "Michael C. Bush", series: null, volume: null, genre: "Negócios", status: "unread" },
-  { title: "Vou Cuspir no Seu Túmulo", author: "Boris Vian", series: null, volume: null, genre: "Ficção", status: "unread" },
+  { title: "A Great Place to Work for All", author: "Michael C. Bush", series: null, volume: null, genre: "Negócios", status: "unread", language: "en" },
+  { title: "Crime e Castigo", author: "Dostoiévski", series: null, volume: null, genre: "Clássico", status: "unread" },
+  { title: "O Mito de Sísifo", author: "Albert Camus", series: null, volume: null, genre: "Filosofia", status: "unread" },
+  { title: "Uma Vida Pequena", author: "Hanya Yanagihara", series: null, volume: null, genre: "Ficção", status: "unread" },
+  { title: "Cai o Pano", author: "Agatha Christie", series: "Hercule Poirot", volume: null, genre: "Mistério", status: "unread" },
+  { title: "Quem Pensa Enriquece: O Legado", author: "Napoleon Hill", series: null, volume: null, genre: "Autoajuda", status: "unread" },
 ];
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -539,6 +543,10 @@ function renderGrid(filtered) {
       <div class="card-author">${b.author||"—"}</div>
       ${b.series ? `<div class="card-series">📚 ${b.series}${b.volume ? ` #${b.volume}` : ""}</div>` : ""}
       ${st === "reading" && b.currentPage ? `<div class="card-series" style="color:#3498db">📄 Pág. ${b.currentPage}</div>` : ""}
+      <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+        ${b.language === "en" ? `<span style="font-size:9px;background:#1a2a3d;color:#5a9fd4;padding:1px 5px;border-radius:8px">🇬🇧 inglês</span>` : ""}
+        ${b.editions > 1 ? `<span style="font-size:9px;background:#2a1a3d;color:#a07ad4;padding:1px 5px;border-radius:8px">📚 ${b.editions}x</span>` : ""}
+      </div>
       <div class="card-dot${dotClass ? " "+dotClass : ""}"></div>
     </div>
   `}).join("");
@@ -554,7 +562,7 @@ function renderList(filtered) {
     return `
     <div class="list-row" onclick="openDetail('${b.id}')">
       <div class="list-dot${dotClass ? " "+dotClass : ""}"></div>
-      <span class="list-title">${b.title}${st === "reading" && b.currentPage ? ` <span style="font-size:10px;color:#3498db">📄 pág. ${b.currentPage}</span>` : ""}</span>
+      <span class="list-title">${b.title}${st === "reading" && b.currentPage ? ` <span style="font-size:10px;color:#3498db">📄 pág. ${b.currentPage}</span>` : ""}${b.language === "en" ? ` <span style="font-size:9px;background:#1a2a3d;color:#5a9fd4;padding:1px 5px;border-radius:8px">🇬🇧</span>` : ""}${b.editions > 1 ? ` <span style="font-size:9px;background:#2a1a3d;color:#a07ad4;padding:1px 5px;border-radius:8px">📚×${b.editions}</span>` : ""}</span>
       <span class="list-author">${b.author||"—"}</span>
       <span class="list-series">${b.series ? `${b.series}${b.volume ? ` #${b.volume}` : ""}` : "—"}</span>
       <span class="list-genre" style="color:${genreColor(b.genre)};background:${genreColor(b.genre)}22">${b.genre||""}</span>
