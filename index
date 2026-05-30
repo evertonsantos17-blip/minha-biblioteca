@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minha Biblioteca</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f0e0c;
+      color: #e8e0d0;
+      font-family: Georgia, 'Times New Roman', serif;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────────────── */
+    #header {
+      background: linear-gradient(180deg, #1a1208 0%, #0f0e0c 100%);
+      border-bottom: 1px solid #3d2f1a;
+      padding: 18px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    #header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    #header h1 { font-size: 24px; letter-spacing: 2px; color: #d4a843; }
+    #header p  { font-size: 11px; color: #8a7a5a; letter-spacing: 1px; margin-top: 2px; }
+    #stats { display: flex; gap: 16px; font-size: 13px; color: #a0906a; flex-wrap: wrap; }
+    #stats strong { color: #d4a843; }
+    #stats .s-read    { color: #4caf50; }
+    #stats .s-reading { color: #3498db; }
+
+    #controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    #controls input,
+    #controls select {
+      padding: 7px 12px;
+      background: #1e1a10;
+      border: 1px solid #3d2f1a;
+      border-radius: 6px;
+      color: #e8e0d0;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    #controls input { flex: 1 1 240px; }
+    #btn-view, #btn-add {
+      padding: 7px 14px;
+      border: 1px solid #3d2f1a;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    #btn-view { background: #2a2010; color: #d4a843; }
+    #btn-add  { background: #d4a843; color: #0f0e0c; font-weight: 700; border-color: #d4a843; }
+
+    /* ── MAIN ───────────────────────────────────────── */
+    #main { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+    #result-count { color: #6a5a3a; font-size: 13px; margin-bottom: 14px; }
+
+    /* ── GRID ───────────────────────────────────────── */
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 13px;
+    }
+    .card {
+      background: #18160f;
+      border: 1px solid #2d2010;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s;
+      position: relative;
+    }
+    .card:hover { transform: translateY(-3px); border-color: #d4a843; }
+    .card.read   { border-color: #2a3d1a; }
+    .card-icon {
+      width: 100%; height: 80px;
+      border-radius: 4px;
+      margin-bottom: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .card-genre { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+    .card-title { font-size: 13px; font-weight: 700; line-height: 1.3; color: #e8e0d0; margin-bottom: 3px; }
+    .card-author { font-size: 11px; color: #8a7a5a; }
+    .card-series { font-size: 10px; color: #5a7a5a; margin-top: 3px; }
+    .card-dot {
+      position: absolute; top: 8px; right: 8px;
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #444;
+    }
+    .card-dot.read    { background: #4caf50; }
+    .card-dot.reading { background: #3498db; }
+
+    /* ── LIST ───────────────────────────────────────── */
+    #list { display: flex; flex-direction: column; gap: 5px; }
+    .list-row {
+      display: flex; align-items: center; gap: 12px;
+      background: #18160f;
+      border: 1px solid #2a2010;
+      border-radius: 6px;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: border-color .1s;
+    }
+    .list-row:hover { border-color: #d4a843; }
+    .list-dot { width: 7px; height: 7px; border-radius: 50%; background: #444; flex-shrink: 0; }
+    .list-dot.read    { background: #4caf50; }
+    .list-dot.reading { background: #3498db; }
+    .list-title  { flex: 1 1 200px; font-weight: 600; font-size: 13px; }
+    .list-author { flex: 1 1 140px; font-size: 12px; color: #8a7a5a; }
+    .list-series { flex: 0 0 160px; font-size: 11px; color: #6a5a3a; }
+    .list-genre  { font-size: 10px; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+
+    /* ── MODAL ──────────────────────────────────────── */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: #0009;
+      z-index: 100;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: #1a1810;
+      border: 1px solid #3d2f1a;
+      border-radius: 12px;
+      padding: 26px;
+      max-width: 400px; width: 100%;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 10px; right: 14px;
+      background: none; border: none;
+      color: #8a7a5a; font-size: 20px; cursor: pointer;
+    }
+    .modal h2 { font-size: 19px; color: #e8e0d0; line-height: 1.3; margin-bottom: 5px; }
+    .modal .m-genre { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .modal .m-author { font-size: 14px; color: #8a7a5a; margin-bottom: 10px; }
+    .modal .m-series { font-size: 12px; color: #5a7a5a; margin-bottom: 14px; }
+    .modal .m-icon { font-size: 30px; margin-bottom: 8px; }
+    .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+    .btn-read {
+      flex: 1; padding: 9px;
+      border: none; border-radius: 6px;
+      cursor: pointer; font-size: 13px; font-family: inherit;
+    }
+    .btn-delete {
+      padding: 9px 14px;
+      background: #3d1a1a; border: none; border-radius: 6px;
+      color: #e74c3c; cursor: pointer; font-size: 14px;
+    }
+
+    /* ── ADD FORM ───────────────────────────────────── */
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 11px; color: #8a7a5a; margin-bottom: 3px; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 7px 11px;
+      background: #0f0e0c; border: 1px solid #3d2f1a;
+      border-radius: 6px; color: #e8e0d0;
+      font-size: 13px; outline: none; font-family: inherit;
+    }
+    .form-check { display: flex; align-items: center; gap: 8px; color: #8a7a5a; font-size: 13px; margin-bottom: 16px; cursor: pointer; }
+    .form-btns { display: flex; gap: 8px; }
+    .btn-save   { flex: 1; padding: 9px; background: #d4a843; border: none; border-radius: 6px; color: #0f0e0c; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .btn-cancel { padding: 9px 14px; background: #2a2010; border: none; border-radius: 6px; color: #8a7a5a; cursor: pointer; font-family: inherit; }
+
+    /* ── LOADING ────────────────────────────────────── */
+    #loading { text-align: center; padding: 60px; color: #6a5a3a; font-size: 15px; }
+
+    @media (max-width: 600px) {
+      .list-series, .list-genre { display: none; }
+      #grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div id="header-top">
+    <div>
+      <h1>📚 MINHA BIBLIOTECA</h1>
+      <p>CATÁLOGO PESSOAL DE EVERTON</p>
+    </div>
+    <div id="stats">
+      <span>📖 <strong id="s-total">0</strong> livros</span>
+      <span>✅ <strong class="s-read" id="s-read">0</strong> lidos</span>
+      <span>📖 <strong class="s-reading" id="s-reading">0</strong> lendo</span>
+      <span>🕮 <strong id="s-unread">0</strong> não iniciados</span>
+    </div>
+  </div>
+  <div id="controls">
+    <input type="text" id="search" placeholder="🔍  Buscar título, autor ou série..." oninput="render()" />
+    <select id="f-genre" onchange="render()"><option value="">Todos os gêneros</option></select>
+    <select id="f-author" onchange="render()"><option value="">Todos os autores</option></select>
+    <select id="f-read" onchange="render()">
+      <option value="">Todos</option>
+      <option value="read">✅ Lidos</option>
+      <option value="reading">📖 Lendo</option>
+      <option value="unread">🕮 Não iniciados</option>
+    </select>
+    <select id="f-sort" onchange="render()">
+      <option value="title">A-Z título</option>
+      <option value="author">A-Z autor</option>
+      <option value="genre">Por gênero</option>
+    </select>
+    <button id="btn-view" onclick="toggleView()">☰ Lista</button>
+    <button id="btn-add" onclick="openAdd()">+ Adicionar</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="loading">Carregando biblioteca...</div>
+  <div id="result-count" style="display:none"></div>
+  <div id="grid" style="display:none"></div>
+  <div id="list" style="display:none"></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="modal-detail" onclick="closeDetail(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-detail')">✕</button>
+    <div class="m-icon" id="d-icon"></div>
+    <div class="m-genre" id="d-genre"></div>
+    <h2 id="d-title"></h2>
+    <div class="m-author" id="d-author"></div>
+    <div class="m-series" id="d-series"></div>
+    <div id="d-page-wrap" style="display:none;margin-bottom:10px">
+      <label style="font-size:11px;color:#8a7a5a;display:block;margin-bottom:4px">Página atual</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="d-page" min="1" placeholder="ex: 142"
+          style="width:110px;padding:6px 10px;background:#0f0e0c;border:1px solid #3d2f1a;border-radius:6px;color:#e8e0d0;font-size:13px;outline:none;font-family:inherit"
+          oninput="savePage()" />
+        <span style="font-size:12px;color:#6a5a3a" id="d-page-hint"></span>
+      </div>
+    </div>
+    <div class="modal-btns" style="flex-wrap:wrap">
+      <button class="btn-read" id="btn-status-unread"  onclick="setStatus('unread')"  style="flex:1;min-width:90px">🕮 Não iniciado</button>
+      <button class="btn-read" id="btn-status-reading" onclick="setStatus('reading')" style="flex:1;min-width:90px">📖 Lendo</button>
+      <button class="btn-read" id="btn-status-read"    onclick="setStatus('read')"    style="flex:1;min-width:90px">✅ Lido</button>
+      <button class="btn-delete" onclick="deleteBook()">🗑️</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="modal-add" onclick="closeDetail(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add')">✕</button>
+    <h2 style="color:#d4a843;margin-bottom:16px;font-size:18px">Adicionar Livro</h2>
+    <div class="form-group"><label>Título *</label><input id="f-title" /></div>
+    <div class="form-group"><label>Autor</label><input id="f-author-in" /></div>
+    <div class="form-group"><label>Série</label><input id="f-series-in" /></div>
+    <div class="form-group"><label>Volume</label><input id="f-vol" type="number" /></div>
+    <div class="form-group"><label>Gênero</label><input id="f-genre-in" /></div>
+    <label class="form-check"><input type="checkbox" id="f-readcheck" /> Já lido</label>
+    <div class="form-btns">
+      <button class="btn-save" onclick="saveBook()">Salvar</button>
+      <button class="btn-cancel" onclick="closeModal('modal-add')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE + APP SCRIPT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── Firebase config ──────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCJn4l8ZrVFPJClu26zMQGdd2_3a_WHoOQ",
+  authDomain: "minhabiblioteca-a1ce9.firebaseapp.com",
+  projectId: "minhabiblioteca-a1ce9",
+  storageBucket: "minhabiblioteca-a1ce9.firebasestorage.app",
+  messagingSenderId: "217710872509",
+  appId: "1:217710872509:web:2cb553db59e5a3fb7f34d4"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
+const COL   = "livros";
+
+// ── Catálogo inicial (carregado só uma vez se Firestore estiver vazio) ────────
+const INITIAL_BOOKS = [
+  { title: "O Pistoleiro",           author: "Stephen King", series: "A Torre Negra", volume: 1, genre: "Terror/Fantasia", status: "unread" },
+  { title: "A Escolha dos Três",     author: "Stephen King", series: "A Torre Negra", volume: 2, genre: "Terror/Fantasia", status: "unread" },
+  { title: "As Terras Devastadas",   author: "Stephen King", series: "A Torre Negra", volume: 3, genre: "Terror/Fantasia", status: "unread" },
+  { title: "Mago e Vidro",           author: "Stephen King", series: "A Torre Negra", volume: 4, genre: "Terror/Fantasia", status: "unread" },
+  { title: "Lobos de Calla",         author: "Stephen King", series: "A Torre Negra", volume: 5, genre: "Terror/Fantasia", status: "unread" },
+  { title: "Canção de Susannah",     author: "Stephen King", series: "A Torre Negra", volume: 6, genre: "Terror/Fantasia", status: "unread" },
+  { title: "A Torre Negra",          author: "Stephen King", series: "A Torre Negra", volume: 7, genre: "Terror/Fantasia", status: "unread" },
+  { title: "O Vento pela Fechadura", author: "Stephen King", series: "A Torre Negra", volume: null, genre: "Terror/Fantasia", status: "unread" },
+  { title: "Cujo",             author: "Stephen King", series: null, volume: null, genre: "Terror", status: "unread" },
+  { title: "Pet Sematary",     author: "Stephen King", series: null, volume: null, genre: "Terror", status: "unread" },
+  { title: "Insomnia",         author: "Stephen King", series: null, volume: null, genre: "Terror", status: "unread" },
+  { title: "Christine",        author: "Stephen King", series: null, volume: null, genre: "Terror", status: "unread" },
+  { title: "Zona Morta",       author: "Stephen King", series: null, volume: null, genre: "Terror", status: "unread" },
+  { title: "It – A Coisa",     author: "Stephen King", series: null, volume: null, genre: "Terror", status: "unread" },
+  { title: "O Iluminado",      author: "Stephen King", series: null, volume: null, genre: "Terror", status: "unread" },
+  { title: "Danse Macabre",    author: "Stephen King", series: null, volume: null, genre: "Terror/Não-ficção", status: "unread" },
+  { title: "A Espera de um Milagre", author: "Stephen King", series: null, volume: null, genre: "Drama", status: "unread" },
+  { title: "The Lord of the Rings (ed. inglês)", author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: null, genre: "Fantasia", status: "unread" },
+  { title: "O Silmarillion",        author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
+  { title: "Os Filhos de Húrin",    author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
+  { title: "Beren e Lúthien",       author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
+  { title: "O Hobbit",              author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
+  { title: "O Hobbit (ed. ilustrada)", author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
+  { title: "A Sociedade do Anel",   author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 1, genre: "Fantasia", status: "unread" },
+  { title: "As Duas Torres",        author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 2, genre: "Fantasia", status: "unread" },
+  { title: "O Retorno do Rei",      author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: 3, genre: "Fantasia", status: "unread" },
+  { title: "A Queda de Númenor",    author: "J.R.R. Tolkien", series: null, volume: null, genre: "Fantasia", status: "unread" },
+  { title: "O Senhor dos Anéis (box)", author: "J.R.R. Tolkien", series: "O Senhor dos Anéis", volume: null, genre: "Fantasia", status: "unread" },
+  { title: "A Tormenta de Espadas", author: "George R.R. Martin", series: "As Crônicas de Gelo e Fogo", volume: 3, genre: "Fantasia", status: "unread" },
+  { title: "O Festim dos Corvos",   author: "George R.R. Martin", series: "As Crônicas de Gelo e Fogo", volume: 4, genre: "Fantasia", status: "unread" },
+  { title: "A Dança dos Dragões",   author: "George R.R. Martin", series: "As Crônicas de Gelo e Fogo", volume: 5, genre: "Fantasia", status: "unread" },
+  { title: "Duna", author: "Frank Herbert", series: "Duna", volume: 1, genre: "Ficção Científica", status: "unread" },
+  { title: "Musashi Vol. 1 – A Terra, A Água, O Fogo", author: "Eiji Yoshikawa", series: "Musashi", volume: 1, genre: "Aventura/Histórico", status: "unread" },
+  { title: "Musashi Vol. 2 – O Vento", author: "Eiji Yoshikawa", series: "Musashi", volume: 2, genre: "Aventura/Histórico", status: "unread" },
+  { title: "Musashi Vol. 3 – As Duas Forças, A Harmonia Final", author: "Eiji Yoshikawa", series: "Musashi", volume: 3, genre: "Aventura/Histórico", status: "unread" },
+  { title: "Inferno",           author: "Dan Brown", series: "Robert Langdon", volume: null, genre: "Thriller", status: "unread" },
+  { title: "Origem",            author: "Dan Brown", series: "Robert Langdon", volume: null, genre: "Thriller", status: "unread" },
+  { title: "Fortaleza Digital", author: "Dan Brown", series: null, volume: null, genre: "Thriller", status: "unread" },
+  { title: "Ponto de Impacto",  author: "Dan Brown", series: null, volume: null, genre: "Thriller", status: "unread" },
+  { title: "O Símbolo Perdido", author: "Dan Brown", series: "Robert Langdon", volume: null, genre: "Thriller", status: "unread" },
+  { title: "O Segredo Final",   author: "Dan Brown", series: null, volume: null, genre: "Thriller", status: "unread" },
+  { title: "Harry Potter and the Sorcerer's Stone",    author: "J.K. Rowling", series: "Harry Potter", volume: 1, genre: "Fantasia", status: "unread" },
+  { title: "Harry Potter and the Chamber of Secrets",  author: "J.K. Rowling", series: "Harry Potter", volume: 2, genre: "Fantasia", status: "unread" },
+  { title: "Harry Potter and the Prisoner of Azkaban", author: "J.K. Rowling", series: "Harry Potter", volume: 3, genre: "Fantasia", status: "unread" },
+  { title: "12 Regras Para a Vida", author: "Jordan B. Peterson", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "Além da Ordem",         author: "Jordan B. Peterson", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "A Revolta de Atlas",    author: "Ayn Rand",       series: null, volume: null, genre: "Ficção/Filosofia", status: "unread" },
+  { title: "Os Irmãos Karamázov",   author: "Dostoiévski",    series: null, volume: null, genre: "Clássico", status: "unread" },
+  { title: "1984",                  author: "George Orwell",  series: null, volume: null, genre: "Distopia", status: "unread" },
+  { title: "Sapiens",               author: "Yuval Noah Harari", series: null, volume: null, genre: "Não-ficção", status: "unread" },
+  { title: "O Príncipe",            author: "Maquiavel",      series: null, volume: null, genre: "Filosofia/Política", status: "unread" },
+  { title: "Meditações",            author: "Marco Aurélio",  series: null, volume: null, genre: "Filosofia", status: "unread" },
+  { title: "Sobre a Brevidade da Vida", author: "Sêneca",     series: null, volume: null, genre: "Filosofia", status: "unread" },
+  { title: "O Escaravelho de Ouro e Outras Histórias", author: "Edgar Allan Poe", series: null, volume: null, genre: "Clássico/Terror", status: "unread" },
+  { title: "O Corvo e Outros Contos",                  author: "Edgar Allan Poe", series: null, volume: null, genre: "Clássico/Terror", status: "unread" },
+  { title: "O Gato Preto e Outras Histórias",          author: "Edgar Allan Poe", series: null, volume: null, genre: "Clássico/Terror", status: "unread" },
+  { title: "E Não Sobrou Nenhum", author: "Agatha Christie", series: null, volume: null, genre: "Mistério", status: "unread" },
+  { title: "O Natal de Poirot",   author: "Agatha Christie", series: "Hercule Poirot", volume: null, genre: "Mistério", status: "unread" },
+  { title: "Valuation",           author: "Damodaran", series: null, volume: null, genre: "Finanças", status: "unread" },
+  { title: "Análise de Riscos",   author: "Lima",      series: null, volume: null, genre: "Negócios", status: "unread" },
+  { title: "O Verdadeiro Poder",  author: "Vicente Falconi", series: null, volume: null, genre: "Liderança", status: "unread" },
+  { title: "Psicologia Empresarial", author: null, series: null, volume: null, genre: "Psicologia", status: "unread" },
+  { title: "Análise Avançada das Demonstrações Contábeis", author: "Martins / Diniz / Miranda", series: null, volume: null, genre: "Finanças", status: "unread" },
+  { title: "Antifrágil",          author: "Nassim Nicholas Taleb", series: null, volume: null, genre: "Negócios/Filosofia", status: "unread" },
+  { title: "Pipeline de Liderança", author: null, series: null, volume: null, genre: "Liderança", status: "unread" },
+  { title: "Liderança para Fazer Acontecer", author: "Tejon", series: null, volume: null, genre: "Liderança", status: "unread" },
+  { title: "A Coragem para Liderar", author: "Brené Brown", series: null, volume: null, genre: "Liderança", status: "unread" },
+  { title: "Performance Líder – 10 Anos", author: null, series: null, volume: null, genre: "Liderança", status: "unread" },
+  { title: "Warren Buffett e a Análise de Balanços", author: "Mary Buffett / David Clark", series: null, volume: null, genre: "Finanças", status: "unread" },
+  { title: "A Grande Missão",     author: "Reinaldo Guarany", series: null, volume: null, genre: "Negócios", status: "unread" },
+  { title: "71 Segundos – o Jogo de uma Vida", author: "Luiz Zini Pires", series: null, volume: null, genre: "Negócios", status: "unread" },
+  { title: "A Interpretação das Demonstrações Financeiras", author: "Benjamin Graham / Spencer B. Meredith", series: null, volume: null, genre: "Finanças", status: "unread" },
+  { title: "Casais Inteligentes Enriquecem Juntos", author: "Gustavo Cerbasi", series: null, volume: null, genre: "Finanças", status: "unread" },
+  { title: "Bitcoin Red Pill", author: null, series: null, volume: null, genre: "Tecnologia/Finanças", status: "unread" },
+  { title: "As Seis Lições",   author: "Ludwig von Mises", series: null, volume: null, genre: "Economia", status: "unread" },
+  { title: "A História da Mitologia para Quem Tem Pressa", author: "Mark Daniels", series: null, volume: null, genre: "Mitologia", status: "unread" },
+  { title: "Marxismo Desmascarado", author: null, series: null, volume: null, genre: "Política/Economia", status: "unread" },
+  { title: "Nação Dopamina",        author: "Dra. Anna Lembke", series: null, volume: null, genre: "Psicologia", status: "unread" },
+  { title: "Em Busca de Nós Mesmos", author: "Cláudio de Barros Filho / Pedro Calabrez", series: null, volume: null, genre: "Filosofia/Psicologia", status: "unread" },
+  { title: "Em Busca de Sentido",   author: "Viktor E. Frankl", series: null, volume: null, genre: "Psicologia", status: "unread" },
+  { title: "A Lição Final",         author: "Randy Pausch", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "Tuesdays with Morrie",  author: "Mitch Albom", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "O Homem Mais Feliz do Mundo", author: "Eddie Jaku", series: null, volume: null, genre: "Memórias", status: "unread" },
+  { title: "A morte é um dia que vale a pena viver", author: "Ana Cláudia Quintana Arantes", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "Quem Pensa Enriquece",  author: "Napoleon Hill", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "As 48 Leis do Poder",   author: "Robert Greene", series: null, volume: null, genre: "Autoajuda", status: "unread" },
+  { title: "A Arte da Guerra",      author: "Sun Tzu", series: null, volume: null, genre: "Estratégia", status: "unread" },
+  { title: "Comunicação Não Violenta", author: "Marshall B. Rosenberg", series: null, volume: null, genre: "Comunicação", status: "unread" },
+  { title: "Amor Líquido",          author: "Bauman", series: null, volume: null, genre: "Sociologia", status: "unread" },
+  { title: "Dedique-se de Coração", author: "Renato Amoedo / Alan Schramm", series: null, volume: null, genre: "Negócios", status: "unread" },
+  { title: "A Marca da Vitória",    author: "Howard Schultz / Phil Knight", series: null, volume: null, genre: "Negócios", status: "unread" },
+  { title: "Como Chegar ao Sim com Você Mesmo", author: "William Ury", series: null, volume: null, genre: "Negócios", status: "unread" },
+  { title: "Como Chegar ao Sim", author: "Roger Fisher / William Ury / Bruce Patton", series: null, volume: null, genre: "Negócios", status: "unread" },
+  { title: "A Casa das Sete Mulheres", author: "Leticia Wierzchowski", series: null, volume: null, genre: "Ficção Histórica", status: "unread" },
+  { title: "O Vencedor Está Só",    author: "Paulo Coelho", series: null, volume: null, genre: "Ficção", status: "unread" },
+  { title: "O Diário de um Mago",   author: "Paulo Coelho", series: null, volume: null, genre: "Ficção/Espiritual", status: "unread" },
+  { title: "O Bebê de Rosemary",    author: "Ira Levin", series: null, volume: null, genre: "Terror", status: "unread" },
+  { title: "A Lista de Schindler",  author: "Mietek Pemper", series: null, volume: null, genre: "Ficção Histórica", status: "unread" },
+  { title: "Morte no Internato",    author: "Lucinda Riley", series: null, volume: null, genre: "Mistério", status: "unread" },
+  { title: "A Empregada",           author: "Freida McFadden", series: null, volume: null, genre: "Suspense", status: "unread" },
+  { title: "A Hospedeira",          author: "Stephenie Meyer", series: null, volume: null, genre: "Ficção Científica", status: "unread" },
+  { title: "Gossip Girl",           author: "Cecily von Ziegesar", series: "Gossip Girl", volume: null, genre: "Ficção", status: "unread" },
+  { title: "Vou Cuspir no Seu Túmulo", author: "Boris Vian", series: null, volume: null, genre: "Ficção", status: "unread" },
+  { title: "As Últimas Testemunhas", author: "Svetlana Aleksiévitch", series: null, volume: null, genre: "Não-ficção/Literatura", status: "unread" },
+  { title: "A Good Girl's Guide to Murder", author: "Holly Jackson", series: null, volume: null, genre: "Mistério", status: "unread" },
+  { title: "Alfanje",               author: "Bahiyih Nakhjavani", series: null, volume: null, genre: "Ficção", status: "unread" },
+  { title: "Voragem",               author: "Junichiro Tanizaki", series: null, volume: null, genre: "Ficção", status: "unread" },
+  { title: "Mitos e Lendas Nórdicos", author: null, series: null, volume: null, genre: "Mitologia", status: "unread" },
+  { title: "Contos e Sagas Nórdicos", author: null, series: null, volume: null, genre: "Mitologia", status: "unread" },
+  { title: "Meditações",            author: "Marco Aurélio", series: null, volume: null, genre: "Filosofia", status: "unread" },
+  { title: "Cartas de um Diabo a seu Aprendiz", author: "C.S. Lewis", series: null, volume: null, genre: "Ficção/Fantasia", status: "unread" },
+  { title: "Viagem ao Redor do Meu Quarto", author: "Xavier de Maistre", series: null, volume: null, genre: "Clássico", status: "unread" },
+  { title: "Aventuras Inéditas de Sherlock Holmes", author: "Arthur Conan Doyle", series: "Sherlock Holmes", volume: null, genre: "Mistério", status: "unread" },
+  { title: "A Great Place to Work for All", author: "Michael C. Bush", series: null, volume: null, genre: "Negócios", status: "unread" },
+  { title: "Vou Cuspir no Seu Túmulo", author: "Boris Vian", series: null, volume: null, genre: "Ficção", status: "unread" },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let books       = [];
+let currentView = "grid";
+let selectedId  = null;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function genreColor(g) {
+  if (!g) return "#555";
+  if (g.includes("Terror"))    return "#c0392b";
+  if (g.includes("Fantasia"))  return "#2980b9";
+  if (g.includes("Ficção C") || g.includes("Distopia")) return "#27ae60";
+  if (g.includes("Thriller") || g.includes("Suspense")) return "#e67e22";
+  if (g.includes("Liderança") || g.includes("Negócios")) return "#16a085";
+  if (g.includes("Finanças") || g.includes("Economia")) return "#1a6639";
+  if (g.includes("Autoajuda") || g.includes("Psicologia")) return "#f39c12";
+  if (g.includes("Clássico") || g.includes("Mitologia")) return "#7f8c8d";
+  if (g.includes("Filosofia") || g.includes("Política")) return "#6c3483";
+  if (g.includes("Mistério"))  return "#8e44ad";
+  if (g.includes("Aventura") || g.includes("Histórico")) return "#d35400";
+  return "#4a4a4a";
+}
+function genreEmoji(g) {
+  if (!g) return "📖";
+  if (g.includes("Terror"))    return "👁️";
+  if (g.includes("Fantasia"))  return "🐉";
+  if (g.includes("Ficção C") || g.includes("Distopia")) return "🚀";
+  if (g.includes("Thriller") || g.includes("Suspense") || g.includes("Mistério")) return "🔍";
+  if (g.includes("Liderança") || g.includes("Negócios")) return "💼";
+  if (g.includes("Finanças") || g.includes("Economia")) return "📊";
+  if (g.includes("Autoajuda")) return "💡";
+  if (g.includes("Psicologia")) return "🧠";
+  if (g.includes("Filosofia")) return "🏛️";
+  if (g.includes("Mitologia")) return "⚡";
+  if (g.includes("Aventura") || g.includes("Histórico")) return "⚔️";
+  if (g.includes("Clássico"))  return "🎭";
+  return "📖";
+}
+
+// ── Load / Seed ───────────────────────────────────────────────────────────────
+async function loadBooks() {
+  const snap = await getDocs(collection(db, COL));
+  if (snap.empty) {
+    // Seed initial catalog
+    for (const b of INITIAL_BOOKS) {
+      await addDoc(collection(db, COL), b);
+    }
+    // Reload
+    const snap2 = await getDocs(collection(db, COL));
+    books = snap2.docs.map(d => ({ id: d.id, ...d.data() }));
+  } else {
+    books = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  document.getElementById("loading").style.display = "none";
+  populateFilters();
+  render();
+}
+
+function populateFilters() {
+  const genres  = [...new Set(books.map(b => b.genre).filter(Boolean))].sort();
+  const authors = [...new Set(books.map(b => b.author).filter(Boolean))].sort();
+  const gSel = document.getElementById("f-genre");
+  const aSel = document.getElementById("f-author");
+  genres.forEach(g  => { const o = document.createElement("option"); o.value = g; o.textContent = g; gSel.appendChild(o); });
+  authors.forEach(a => { const o = document.createElement("option"); o.value = a; o.textContent = a; aSel.appendChild(o); });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+window.render = function() {
+  const q      = document.getElementById("search").value.toLowerCase();
+  const genre  = document.getElementById("f-genre").value;
+  const author = document.getElementById("f-author").value;
+  const readF  = document.getElementById("f-read").value;
+  const sortV  = document.getElementById("f-sort").value;
+
+  let filtered = books.filter(b => {
+    const mq = !q || b.title.toLowerCase().includes(q) || (b.author||"").toLowerCase().includes(q) || (b.series||"").toLowerCase().includes(q);
+    const mg = !genre  || b.genre  === genre;
+    const ma = !author || b.author === author;
+    const mr = !readF || (
+      readF === "read"    ? b.status === "read" :
+      readF === "reading" ? b.status === "reading" :
+      (!b.status || b.status === "unread")
+    );
+    return mq && mg && ma && mr;
+  });
+
+  filtered.sort((a, b) => {
+    if (sortV === "author") return (a.author||"").localeCompare(b.author||"", "pt");
+    if (sortV === "genre")  return (a.genre||"").localeCompare(b.genre||"", "pt");
+    return a.title.localeCompare(b.title, "pt");
+  });
+
+  // Stats
+  document.getElementById("s-total").textContent   = books.length;
+  document.getElementById("s-read").textContent    = books.filter(b => b.status === "read").length;
+  document.getElementById("s-reading").textContent = books.filter(b => b.status === "reading").length;
+  document.getElementById("s-unread").textContent  = books.filter(b => !b.status || b.status === "unread").length;
+
+  const countEl = document.getElementById("result-count");
+  countEl.style.display = "block";
+  countEl.textContent   = `${filtered.length} livro${filtered.length !== 1 ? "s" : ""} encontrado${filtered.length !== 1 ? "s" : ""}`;
+
+  if (currentView === "grid") renderGrid(filtered);
+  else renderList(filtered);
+}
+
+function renderGrid(filtered) {
+  document.getElementById("grid").style.display = "grid";
+  document.getElementById("list").style.display = "none";
+  const el = document.getElementById("grid");
+  el.innerHTML = filtered.map(b => {
+    const st = b.status || "unread";
+    const dotClass = st === "read" ? "read" : st === "reading" ? "reading" : "";
+    const cardClass = st === "read" ? " read" : "";
+    return `
+    <div class="card${cardClass}" onclick="openDetail('${b.id}')">
+      <div class="card-icon" style="background:linear-gradient(135deg,${genreColor(b.genre)}22,${genreColor(b.genre)}55)">
+        ${genreEmoji(b.genre)}
+      </div>
+      <div class="card-genre" style="color:${genreColor(b.genre)}">${b.genre||""}</div>
+      <div class="card-title">${b.title}</div>
+      <div class="card-author">${b.author||"—"}</div>
+      ${b.series ? `<div class="card-series">📚 ${b.series}${b.volume ? ` #${b.volume}` : ""}</div>` : ""}
+      ${st === "reading" && b.currentPage ? `<div class="card-series" style="color:#3498db">📄 Pág. ${b.currentPage}</div>` : ""}
+      <div class="card-dot${dotClass ? " "+dotClass : ""}"></div>
+    </div>
+  `}).join("");
+}
+
+function renderList(filtered) {
+  document.getElementById("grid").style.display = "none";
+  document.getElementById("list").style.display = "flex";
+  const el = document.getElementById("list");
+  el.innerHTML = filtered.map(b => {
+    const st = b.status || "unread";
+    const dotClass = st === "read" ? "read" : st === "reading" ? "reading" : "";
+    return `
+    <div class="list-row" onclick="openDetail('${b.id}')">
+      <div class="list-dot${dotClass ? " "+dotClass : ""}"></div>
+      <span class="list-title">${b.title}${st === "reading" && b.currentPage ? ` <span style="font-size:10px;color:#3498db">📄 pág. ${b.currentPage}</span>` : ""}</span>
+      <span class="list-author">${b.author||"—"}</span>
+      <span class="list-series">${b.series ? `${b.series}${b.volume ? ` #${b.volume}` : ""}` : "—"}</span>
+      <span class="list-genre" style="color:${genreColor(b.genre)};background:${genreColor(b.genre)}22">${b.genre||""}</span>
+    </div>
+  `}).join("");
+}
+
+// ── View toggle ───────────────────────────────────────────────────────────────
+window.toggleView = function() {
+  currentView = currentView === "grid" ? "list" : "grid";
+  document.getElementById("btn-view").textContent = currentView === "grid" ? "☰ Lista" : "⊞ Grade";
+  render();
+}
+
+// ── Detail modal ──────────────────────────────────────────────────────────────
+window.openDetail = function(id) {
+  selectedId = id;
+  const b = books.find(x => x.id === id);
+  if (!b) return;
+  const st = b.status || "unread";
+  document.getElementById("d-icon").textContent   = genreEmoji(b.genre);
+  document.getElementById("d-genre").textContent  = b.genre || "";
+  document.getElementById("d-genre").style.color  = genreColor(b.genre);
+  document.getElementById("d-title").textContent  = b.title;
+  document.getElementById("d-author").textContent = b.author || "Autor desconhecido";
+  const seriesEl = document.getElementById("d-series");
+  seriesEl.textContent = b.series ? `📚 ${b.series}${b.volume ? ` — Vol. ${b.volume}` : ""}` : "";
+
+  // Page field
+  const pageWrap = document.getElementById("d-page-wrap");
+  const pageInput = document.getElementById("d-page");
+  const pageHint  = document.getElementById("d-page-hint");
+  if (st === "reading") {
+    pageWrap.style.display = "block";
+    pageInput.value = b.currentPage || "";
+    pageHint.textContent = b.currentPage ? `(salvo)` : "";
+  } else {
+    pageWrap.style.display = "none";
+  }
+
+  // Highlight active status button
+  ["unread","reading","read"].forEach(s => {
+    const btn = document.getElementById("btn-status-" + s);
+    const active = s === st;
+    btn.style.background = active ? (s === "read" ? "#2a3d1a" : s === "reading" ? "#1a2a3d" : "#2a2010") : "#1a1810";
+    btn.style.color      = active ? (s === "read" ? "#4caf50" : s === "reading" ? "#3498db" : "#d4a843") : "#6a5a3a";
+    btn.style.border     = active ? `1px solid ${s === "read" ? "#4caf50" : s === "reading" ? "#3498db" : "#d4a843"}` : "1px solid #2a2010";
+  });
+
+  document.getElementById("modal-detail").classList.add("open");
+}
+
+window.setStatus = async function(newStatus) {
+  const b = books.find(x => x.id === selectedId);
+  if (!b) return;
+  const updates = { status: newStatus };
+  if (newStatus !== "reading") updates.currentPage = null;
+  await updateDoc(doc(db, COL, selectedId), updates);
+  b.status = newStatus;
+  if (newStatus !== "reading") b.currentPage = null;
+  openDetail(selectedId);
+  render();
+}
+
+window.savePage = async function() {
+  const b = books.find(x => x.id === selectedId);
+  if (!b) return;
+  const page = Number(document.getElementById("d-page").value) || null;
+  await updateDoc(doc(db, COL, selectedId), { currentPage: page });
+  b.currentPage = page;
+  document.getElementById("d-page-hint").textContent = page ? "(salvo ✓)" : "";
+  render();
+}
+
+window.deleteBook = async function() {
+  if (!confirm("Remover este livro da biblioteca?")) return;
+  await deleteDoc(doc(db, COL, selectedId));
+  books = books.filter(x => x.id !== selectedId);
+  closeModal("modal-detail");
+  render();
+}
+
+// ── Add modal ─────────────────────────────────────────────────────────────────
+window.openAdd = function() {
+  document.getElementById("f-title").value      = "";
+  document.getElementById("f-author-in").value  = "";
+  document.getElementById("f-series-in").value  = "";
+  document.getElementById("f-vol").value        = "";
+  document.getElementById("f-genre-in").value   = "";
+  document.getElementById("f-readcheck").checked = false;
+  document.getElementById("modal-add").classList.add("open");
+}
+
+window.saveBook = async function() {
+  const title = document.getElementById("f-title").value.trim();
+  if (!title) { alert("Informe o título!"); return; }
+  const newBook = {
+    title,
+    author:  document.getElementById("f-author-in").value.trim() || null,
+    series:  document.getElementById("f-series-in").value.trim() || null,
+    volume:  document.getElementById("f-vol").value ? Number(document.getElementById("f-vol").value) : null,
+    genre:   document.getElementById("f-genre-in").value.trim() || "Outro",
+    status:  document.getElementById("f-readcheck").checked ? "read" : "unread",
+  };
+  const ref = await addDoc(collection(db, COL), newBook);
+  books.push({ id: ref.id, ...newBook });
+  closeModal("modal-add");
+  render();
+}
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove("open");
+}
+window.closeDetail = function(e) {
+  if (e.target.classList.contains("overlay")) {
+    document.querySelectorAll(".overlay").forEach(o => o.classList.remove("open"));
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadBooks();
+</script>
+</body>
+</html>
